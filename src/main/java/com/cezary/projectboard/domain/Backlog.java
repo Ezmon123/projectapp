@@ -26,6 +26,7 @@ public class Backlog {
     @JsonIgnore
     private Project project;
 
+    
     //OneToMany projectTask
     @OneToMany(cascade = CascadeType.REFRESH, fetch = FetchType.EAGER, mappedBy = "backlog", orphanRemoval = true)
     @JsonIgnore
