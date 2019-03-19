@@ -6,10 +6,12 @@ import PropTypes from 'prop-types';
 import {connect} from "react-redux";
 import {createProject, getProjects} from "../actions/projectActions";
 import {bindActionCreators} from "redux";
+import {cleanErrors} from "../actions/errorsActions";
 
 class Dashboard extends Component {
 
     componentDidMount() {
+        this.props.cleanErrors();
         this.props.getProjects();
     }
 
@@ -40,11 +42,17 @@ class Dashboard extends Component {
 
 Dashboard.propTypes = {
     project: PropTypes.object.isRequired,
-    getProjects: PropTypes.func.isRequired
+    getProjects: PropTypes.func.isRequired,
+    cleanErrors: PropTypes.func.isRequired
 };
 
 function matchDispatchToProps(dispatch) {
-    return bindActionCreators({getProjects: getProjects}, dispatch);
+    return bindActionCreators(
+        {
+            getProjects: getProjects,
+            cleanErrors: cleanErrors
+
+        }, dispatch);
 }
 
 function mapStateToProps(state) {
