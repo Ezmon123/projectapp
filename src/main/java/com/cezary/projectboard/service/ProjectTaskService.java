@@ -5,13 +5,16 @@ import com.cezary.projectboard.domain.Project;
 import com.cezary.projectboard.domain.ProjectTask;
 import com.cezary.projectboard.exception.ProjectIdException;
 import com.cezary.projectboard.repository.BacklogRepository;
+import com.cezary.projectboard.repository.ProjectRepository;
 import com.cezary.projectboard.repository.ProjectTaskRepository;
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
 
+@Log4j
 @Service
 public class ProjectTaskService {
     @Autowired
@@ -19,6 +22,9 @@ public class ProjectTaskService {
 
     @Autowired
     private ProjectTaskRepository projectTaskRepository;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     public ProjectTask addProjectTask(String projectIdentifier, ProjectTask projectTask) {
         try {
@@ -51,11 +57,19 @@ public class ProjectTaskService {
     }
 
     public Iterable<ProjectTask> findAllById(String projectIdentifier) {
-        List<ProjectTask> projectTasks = projectTaskRepository.findAllByProjectIdentifierOrderByPriority(projectIdentifier);
-        if (projectTasks.isEmpty()) {
-            throw new ProjectIdException("Project with ID: " + projectIdentifier + " does not exist");
+//        List<ProjectTask> projectTasks = projectTaskRepository.findAllByProjectIdentifierOrderByPriority(projectIdentifier);
+//        if (projectTasks.isEmpty()) {
+//            throw new ProjectIdException("Tasks for project with identifier: " + projectIdentifier + " not found");
+//        }
+//        log.info("im here");
+//        return projectTasks;
+        Project project = projectRepository.findByProjectIdentifier(projectIdentifier);
+
+        if (project == null) {
+            throw new ProjectIdException("Project with ID: '" + projectIdentifier + "' does not exist");
         }
-        return projectTasks;
+
+        return projectTaskRepository.findAllByProjectIdentifierOrderByPriority(projectIdentifier);
     }
 
     public ProjectTask findPTByProjectSequence(String backlog_id, String pt_id) {
@@ -73,25 +87,19 @@ public class ProjectTaskService {
         if (!projectTask.getProjectIdentifier().equals(backlog_id)) {
             throw new ProjectIdException("Project Task with project sequence: " + pt_id + " does not exist in Project with id: " + backlog_id);
         }
-        return projectTaskRepository.findByProjectSequence(pt_id);
+        return projectTask;
     }
 
     public ProjectTask updateByProjectSequence(ProjectTask updateTask, String backlog_id, String pt_id) {
         ProjectTask projectTask = findPTByProjectSequence(backlog_id, pt_id);
 
         projectTask = updateTask;
-
         return projectTaskRepository.save(projectTask);
     }
 
-    public void deleteProjectTaskByProjectSequence(String backlog_id, String pt_id){
+    public void deleteProjectTaskByProjectSequence(String backlog_id, String pt_id) {
         ProjectTask projectTask = findPTByProjectSequence(backlog_id, pt_id);
 
         projectTaskRepository.delete(projectTask);
     }
-
-
-
-
-
 }
