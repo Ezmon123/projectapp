@@ -83,6 +83,11 @@ public class Project {
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "project", cascade = CascadeType.ALL)
     private Backlog backlog;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private User user;
+
+    private String projectLeader;
     //method will be call and executed before persist operation
     @PrePersist
     protected void onCreate(){
